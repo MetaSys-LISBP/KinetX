@@ -1,9 +1,9 @@
 ################
 ### kinetX ###
 ################
-# 08/06/2018
+# 02/22/2018
 # kinetX.py
-# version 0.4
+# version 0.1
 #
 # This script processes series of 1D spectra (acquired as a pseudo 2D and preprocessed
 # with splitserph) to extract changes of chemical shifts and intensity, e.g. used for
@@ -13,10 +13,6 @@
 ### Changes log  ###
 ####################
 #
-#    v0.4 (08/06/2018)
-#        - new feature: integration routine
-#        - new feature: extraction & processing of rows (EFP(), APKS())
-#                       (splitser is not a dependency anymore)
 #    v0.3 (25/05/2018)
 #        - clean code
 #    v0.2 (15/03/2018)
@@ -73,7 +69,7 @@ def load_plist(f_in):
 def write_ppres(res_folder, slist, ndims, arg):
 	if arg == "w":
 	  outpp = "Peak picking results\n\n"
-	  outpp += "PeakName\tPeakID\tExpno\tSlice\tF1 (ppm)\tIntensity\tresF1\tintegral\n"
+	  outpp += "PeakName\tPeakID\tExpno\tSlice\tF1 (ppm)\tIntensity\tresF1\n"
 	  outpp += "\n".join("\t".join(str(j) for j in i) for i in slist)
 	elif arg == "a":
 	  outpp = "\n"+"\n".join("\t".join(str(j) for j in i) for i in slist)
@@ -83,7 +79,7 @@ def write_ppres(res_folder, slist, ndims, arg):
 	f.close()
 	if arg == "a":
 		outpp = "Peak picking results\n\n"+\
-		"PeakName\tPeakID\tExpno\tSlice\tF1 (ppm)\tIntensity\tresF1\tintegral"+\
+		"PeakName\tPeakID\tExpno\tSlice\tF1 (ppm)\tIntensity\tresF1"+\
 		outpp
 	return(outpp)
 
@@ -115,22 +111,6 @@ def updateXML(icurdata, pk, po, ndims):
   f.write(''.join(upd_pk_list_f))
   f.close()
     
-def parse_intrng(f_intrng, ppm):
-	try:
-		f=open(f_intrng, 'r')
-		for l in f.readlines():
-		  lint = l.split(" ")
-		  lint = [i for i in lint if i!=""]
-		  try:
-		  	if (float(lint[2]) < float(ppm) < float(lint[1])):
-		  	  vint = lint[3].strip("\n")
-		  except:
-		  	pass
-		f.close()
-		return(vint)
-	except:
-	  return(None)
-
 def createDic1D():
 	try:
 	  XCMD("dpl")
@@ -156,44 +136,11 @@ if GETPROCDIM() != 2:
   ERRMSG(message = "The spectrum to process must have 2 dimensions.", title="Error", details=None, modal=1)
   EXIT()
 
-# extract procnos
-# get td
-try:
-	td = GETPAR("TD", 1)
-except:
-	ERRMSG(message = "An unknown error has occured.\nPlease verify that the 2D spectrum is correct and has been processed.", title="Error", details=None, modal=1)
-	EXIT()
-# select rows to extract
-extract=False
-value = SELECT("kinetX", "Extract rows of the 2D spectrum?\n(into procnos > 1000)", ["Yes", "No", "Cancel"])
-if value == 0:
-	extract = True
-	ask_n = INPUT_DIALOG("kinetX", "", ["First row"], ["1"], [""], ["1"])
-	ask_n2 = INPUT_DIALOG("kinetX", "", ["Last row"], [td], [""], ["1"])
-	try:
-		if (int(ask_n[0])<1 or int(ask_n[0])>int(td)-1 or int(ask_n2[0])<1 or int(ask_n[0])>int(ask_n[0])):
-			ERRMSG(message = "An unknown error has occured.\nPlease verify that the 2D spectrum is correct and has been processed.", title="Error", details=None, modal=1)
-			EXIT()
-		else:
-			lr = range(int(ask_n[0]), int(ask_n2[0])+1, 1)
-	except:
-		ERRMSG(message = "An unknown error has occured.\nPlease verify that the 2D spectrum is correct and has been processed.", title="Error", details=None, modal=1)
-		EXIT()
-elif value == 2:
-	EXIT()
-# extract rows
-if extract==True:
-	for i in lr:
-		try:
-		  RSER(str(i), str(999+i), show="n")
-		except:
-		  ERRMSG(message = "An unknown error has occured with row " + str(i) + ",\nplease verify the 2D spectrum.", title="Error", details=None, modal=1)
-
 # run peack picking ?
 runPP = True
 
 # update existing results files ?
-arg = "a" if "--app" in sys.argv else "w"
+arg = "a" if "--upd" in sys.argv else "w"
 
 # get current dataset & list expnos
 current_dataset = CURDATA()
@@ -208,10 +155,6 @@ for i in expnos:
 		except:
 			pass
 expnos = expnos_filt
-if len(expnos)<1:
-	ERRMSG(message = "No data to process.", title="Error", details=None, modal=1)
-	EXIT()
-	
 
 # create output directories (res & tmp)
 res_folder = os.path.join(current_dataset[3], current_dataset[0], "res").replace("\\", "/")
@@ -251,30 +194,30 @@ if runPP == True:
           ERRMSG(message = "No signal to process.", title="Error", details=None, modal=1)
           EXIT()
   # get the number of expnos to process
-  ask_n = INPUT_DIALOG("kinetX", "", ["First row"], ["1"], [""], ["1"])
+  ask_n = INPUT_DIALOG("kinetX", "", ["First slice"], ["1"], [""], ["1"])
   if ask_n == None:
         EXIT()
   try:
           i_min = int(ask_n[0])-1
   except:
-          ERRMSG(message = "Row to process must be a positive integer.", title="Error", details=None, modal=1)
+          ERRMSG(message = "Slice to process must be a positive integer.", title="Error", details=None, modal=1)
           EXIT()
   if i_min < 0:
-          ERRMSG(message = "Row to process must be a positive integer.", title="Error", details=None, modal=1)
+          ERRMSG(message = "Slice to process must be a positive integer.", title="Error", details=None, modal=1)
           EXIT()
-  ask_n = INPUT_DIALOG("kinetX", "", ["Last row"], [str(len(expnos))], [""], ["1"])
+  ask_n = INPUT_DIALOG("kinetX", "", ["Last slice"], [str(len(expnos))], [""], ["1"])
   if ask_n == None:
         EXIT()
   try:
           i_max = int(ask_n[0])-1
   except:
-          ERRMSG(message = "Row to process must be a positive integer.", title="Error", details=None, modal=1)
+          ERRMSG(message = "Slice to process must be a positive integer.", title="Error", details=None, modal=1)
           EXIT()
   if i_max < 1:
-          ERRMSG(message = "Row to process must be a positive integer.", title="Error", details=None, modal=1)
+          ERRMSG(message = "Slice to process must be a positive integer.", title="Error", details=None, modal=1)
           EXIT()
   if i_max > len(expnos)-1:
-          ERRMSG(message = "Row number too high (max=)"+len(expnos)+".", title="Error", details=None, modal=1)
+          ERRMSG(message = "Slice number too high (max=)"+len(expnos)+".", title="Error", details=None, modal=1)
           EXIT()
   # ask for confirmation
   val = CONFIRM("Ok", "Process the following expnos ?\n" + "\n".join(x for x in expnos[i_min:i_max]))
@@ -282,7 +225,6 @@ if runPP == True:
         EXIT()
   # run peak picking & spectrum annotation
   icurdata = current_dataset
-  icurexpno = icurdata[1]
   slist = []
   # for each peak to process
   for pk,v in d_in.items():
@@ -292,8 +234,7 @@ if runPP == True:
           SHOW_STATUS("Processing peak '" + pk + "' in expno '" + str(expnoi) + "'...")
           # load expno (ask for the procno if several procno exists)
           icurdata[1] = expnoi
-          RE(icurdata, show="y")
-          EFP()
+          RE(icurdata, show="n")
           # get the slice from the expno name
           slice = int(expnoi[1:])
           try:
@@ -301,8 +242,9 @@ if runPP == True:
                 listp = GETPEAKSARRAY()
           except:
                 listp = None
+          # parse results
           if listp == None:
-                slist.append([pk, "none", expnoi, slice] + ["none"]*4)
+                slist.append([pk, "none", expnoi, slice] + ["none"]*3)
           else:
                 # get the last peak picked, with highest intensity
                 spec = GETPROCDATA(F1m, F1p)
@@ -313,37 +255,31 @@ if runPP == True:
                 if len(dpol) != 0:
                         idpk = dpol.index(min(dpol))
                         if dpol[idpk] > 2*interv:
-                                slist.append([pk, "none", expnoi, slice] + ["none"]*4)
+                                slist.append([pk, "none", expnoi, slice] + ["none"]*3)
                         else:
                                 peak = listp[idpk]
                                 # get chemical shifts
                                 # as a reminder, to list all peak attributes: dir(peak)
                                 po = peak.getPositions()[0]
-                                # get integral
-                                XCMD("abs")
-                                XCMD(".int")
-                                XCMD(".sret")
-                                f_intrng = os.path.join(icurdata[3], icurdata[0], icurdata[1], 'pdata', icurdata[2], 'integrals.txt').replace("\\", "/")
-                                pint = parse_intrng(f_intrng, po)
                                 # get resolution
                                 reso = peak.getHalfWidth()
                                 # append results
-                                slist.append([pk, peak.getPeakID()+1, expnoi, slice, po, peak.getRealIntensity(), reso, pint])
+                                slist.append([pk, peak.getPeakID()+1, expnoi, slice, po, peak.getRealIntensity(), reso])
                                 # update topspin annotation by modifying the xml file
                                 updateXML(icurdata, pk, po, 1)
                 else:
-                        slist.append([pk, float('nan'), expnoi, slice, float('nan'), float('nan'), float('nan'), float('nan')])
+                        slist.append([pk, float('nan'), expnoi, slice, float('nan'), float('nan'), float('nan')])
   # go back to the initial dataset
-  RE(current_dataset, show="y")
+  RE(current_dataset, show="n")
   # save pp results
   outpp = write_ppres(res_folder, slist, 1, arg)
   out_all = outpp + "\n\n"
   # done
   SHOW_STATUS("Peak picking finished")
-# reload the initial 2D spectrum
-RE(current_dataset, show="y")
+
 
 SHOW_STATUS("Processing finished")
 
 # display results
 VIEWTEXT(title="kinetX report", header="results", text=out_all)
+
