@@ -5,9 +5,8 @@
 # kinetX.py
 # version 0.4
 #
-# This script processes series of 1D spectra (acquired as a pseudo 2D and preprocessed
-# with splitserph) to extract changes of chemical shifts and intensity, e.g. used for
-# pH titration.
+# This script processes series of pseudo 2D spectra to extract changes of chemical shifts and intensity, 
+# e.g. used for pH titration.
 #
 ####################
 ### Changes log  ###
