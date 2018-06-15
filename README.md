@@ -1,6 +1,6 @@
 # KinetX
 
 Usage:
-- kinetix [--app]
 
-argument --app append new processing results in the previous result file, otherwise it is silently overwritten
+just open the 2D pseudo spectra, zoom on the area of interest (only the most intense peak of this area is quantified), and run the command 'kinetx' in TopSpin  
+
