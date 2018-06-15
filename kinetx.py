@@ -77,7 +77,7 @@ def write_ppres(res_folder, slist, ndims, arg):
 	  outpp += "\n".join("\t".join(str(j) for j in i) for i in slist)
 	elif arg == "a":
 	  outpp = "\n"+"\n".join("\t".join(str(j) for j in i) for i in slist)
-	fout = os.path.join(res_folder, "_pp.txt").replace("\\", "/")
+	fout = os.path.join(res_folder, "results.txt").replace("\\", "/")
 	f = open(fout, arg)
 	f.write(outpp)
 	f.close()
@@ -156,6 +156,25 @@ if GETPROCDIM() != 2:
   ERRMSG(message = "The spectrum to process must have 2 dimensions.", title="Error", details=None, modal=1)
   EXIT()
 
+# create output directories (res & tmp)
+current_dataset = CURDATA()
+res_folder = os.path.join(current_dataset[3], current_dataset[0], "res").replace("\\", "/")
+if not os.path.exists(res_folder):
+	os.mkdir(res_folder)
+	arg = "w"
+else:
+	# update existing results files ?
+	if os.path.isfile(os.path.join(res_folder, "results.txt").replace("\\", "/")):
+		value = SELECT("kinetX", "A result file already exists.\nOverwrite existing result file or append the new results?", ["Append", "Overwrite", "Cancel"])
+		if value == 0:
+			arg = "a"
+		elif value == 1:
+			arg = "w"
+		elif value == 2:
+			EXIT()
+	else:
+		arg = "w"
+
 # extract procnos
 # get td
 try:
@@ -192,9 +211,6 @@ if extract==True:
 # run peack picking ?
 runPP = True
 
-# update existing results files ?
-arg = "a" if "--app" in sys.argv else "w"
-
 # get current dataset & list expnos
 current_dataset = CURDATA()
 expnos = os.listdir(os.path.join(current_dataset[3], current_dataset[0]).replace("\\", "/")) 
@@ -213,10 +229,6 @@ if len(expnos)<1:
 	EXIT()
 	
 
-# create output directories (res & tmp)
-res_folder = os.path.join(current_dataset[3], current_dataset[0], "res").replace("\\", "/")
-if not os.path.exists(res_folder):
-	os.mkdir(res_folder)
 
 ##########################################
 #### 1D spectra processing routine
