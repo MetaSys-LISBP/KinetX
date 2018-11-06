@@ -1,9 +1,7 @@
 ################
 ### kinetX ###
 ################
-# 30/08/2018
 # kinetx.py
-# version 0.5
 #
 # This script processes series of 1D spectra (acquired as a pseudo 2D) to
 # extract changes of chemical shifts, intensity and area of a particular
@@ -13,6 +11,8 @@
 ### Changes log  ###
 ####################
 #
+#    v0.6 (06/11/2018)
+#        - fix: last pseudo 1D spectra could not be processed
 #    v0.5 (30/08/2018)
 #        - corrected indentation
 #    v0.4 (08/06/2018)
@@ -278,8 +278,8 @@ except:
 if i_max < 1:
   ERRMSG(message = "Row to process must be a positive integer.", title="Error", details=None, modal=1)
   EXIT()
-if i_max > len(expnos)-1:
-  ERRMSG(message = "Row number too high (max=)"+len(expnos)+".", title="Error", details=None, modal=1)
+if i_max > len(expnos):
+  ERRMSG(message = "Row number too high (max="+str(len(expnos))+").", title="Error", details=None, modal=1)
   EXIT()
 # ask for confirmation
 val = CONFIRM("Ok", "Process the following expnos ?\n" + "\n".join(x for x in expnos[i_min:i_max]))
