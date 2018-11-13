@@ -1,6 +1,6 @@
 # KinetX - High-throughput analysis of (bio)chemical kinetics by NMR
 
-## What is IsoCor?
+## What is KinetX?
 **KinetX is a scientific software dedicated to the processing of (bio)chemical kinetics experiments by NMR**.
 KinetX extracts 1D spectra acquired as pseudo 2D spectra, performs Fourier-transform, phasing and beseline correction on each
 1D spectra, and extract chemical shifts, intensity and area of the signal(s) of interest.
@@ -30,14 +30,22 @@ KinetX requires as input a pseudo 2D spectra which must be Fourier-transformed i
 
 
 **Results**
+
 The folder res is created in the data subdirectory containing all the experiments, and results are stored in the file 'results.txt':
-PeakName	name of the signal
-PeakID	ID of the peak in TopSpin
-Slice	slice of the spectrum (increment in F2)
-F1	F1 chemical shift (ppm)
-dwF1	difference of chemical shifts in F1 compared to the reference spectrum, which is the first expno (ppm)
-Intensity	peak intensity
-resF1	FWHM in F1 dimension (ppm)
+
+- PeakName:	name of the signal
+
+- PeakID:	ID of the peak in TopSpin
+
+- Slice:	slice of the spectrum (increment in F2)
+
+- F1:	F1 chemical shift (ppm)
+
+- dwF1:	difference of chemical shifts in F1 compared to the reference spectrum, which is the first expno (ppm)
+
+- Intensity:	peak intensity
+
+- resF1:	FWHM in F1 dimension (ppm)
 
 Error messages are explicit. After correcting the problem, rerun KinetX.
 
