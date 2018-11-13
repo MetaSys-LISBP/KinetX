@@ -22,7 +22,7 @@ To **use KinetX**:
 KinetX requires as input a pseudo 2D spectra which must be Fourier-transformed in F2.
 
 • Open the pseudo 2D spectra to process.
-• Define the window that contains the signal of interest in the 2D spectra
+• Define the window that contains the signal of interest in the 2D spectra (only the most intense peak of the displayed area wil be processed)
 • Run KinetX:
 · run 'kinetx' in the TopSpin command
 · enter the signal name (used for spectra annotation), the total number of experiments to process, and confirm the information provided
